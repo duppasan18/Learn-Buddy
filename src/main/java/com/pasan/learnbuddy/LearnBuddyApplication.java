@@ -5,6 +5,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
 
 import java.net.InetAddress;
@@ -13,6 +14,7 @@ import java.net.UnknownHostException;
 @SpringBootApplication
 @MapperScan("com.pasan.learnbuddy.mapper")
 @Slf4j
+@EnableConfigurationProperties
 public class LearnBuddyApplication {
 
     public static void main(String[] args) throws UnknownHostException {
