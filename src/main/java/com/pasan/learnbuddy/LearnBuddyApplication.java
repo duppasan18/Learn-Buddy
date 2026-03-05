@@ -27,12 +27,11 @@ public class LearnBuddyApplication {
         }
 
         log.info("\n***************************************************************************************\n\t" +
-                        "应用 '{}' 已启动！访问地址如下：\n\t" +
+                        "应用已启动！访问地址如下：\n\t" +
                         "本地访问: \t\t{}://localhost:{}\n\t" +
                         "外部访问: \t{}://{}:{}\n\t" +
                         "当前环境配置: \t{}" +
                         "\n***************************************************************************************",
-                env.getProperty("spring.application.name"),
                 protocol,
                 env.getProperty("server.port"),
                 protocol,
