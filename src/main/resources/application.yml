@@ -14,3 +14,6 @@ jwt:
   SECRET: ${JWT_SECRET}
   jwt-iss: ${JWT_ISS}
   SUBJECT: ${JWT_SUBJECT}
+security:
+  white-list:
+    - /user/login

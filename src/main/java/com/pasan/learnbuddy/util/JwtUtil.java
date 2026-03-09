@@ -10,8 +10,12 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
+/**
+ * JWT工具类
+ */
 @Component
 public class JwtUtil {
 
@@ -25,7 +29,7 @@ public class JwtUtil {
     private SecretKey KEY;
     private String issuer;
     private String subject;
-    private int expireSeconds;
+    private long expireSeconds;
 
     public JwtUtil(JwtProperties properties){
         this.KEY = Keys.hmacShaKeyFor(properties.getSECRET().getBytes());
@@ -44,7 +48,7 @@ public class JwtUtil {
     iat: jwt的签发时间
     jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击
      */
-    public String genAccessToken(String username) {
+    public String createJWT(Map<String, Object> claims) {
         // 令牌id
         String uuid = UUID.randomUUID().toString();
         Date exprireDate = Date.from(Instant.now().plusSeconds(expireSeconds));
@@ -52,11 +56,9 @@ public class JwtUtil {
         return Jwts.builder()
                 // 设置头部信息header
                 .header()
-                .add("typ", "JWT")
-                .add("alg", "HS256")
                 .and()
                 // 设置自定义负载信息payload
-                .claim("username", username)
+                .claims(claims)
                 // 令牌ID
                 .id(uuid)
                 // 过期日期
@@ -88,7 +90,11 @@ public class JwtUtil {
     }
 
     public Claims parsePayload(String token) {
-        return parseClaim(token).getPayload();
+        try {
+            return parseClaim(token).getPayload();
+        } catch (JwtException e) {
+            throw new RuntimeException("token非法或已过期");
+        }
     }
 
 

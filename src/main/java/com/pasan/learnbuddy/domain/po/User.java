@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
+import com.pasan.learnbuddy.domain.enums.Gender;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -21,20 +24,32 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("user")
+@Builder
 public class User implements Serializable {
+
 
     private static final long serialVersionUID = 1L;
 
-    private String username;
+    private Long id;
 
-    private String nickname;
+    //微信用户唯一标识
+    private String openid;
 
-    private String password;
+    //姓名
+    private String name;
 
-    private Integer learnedTime;
+    //手机号
+    private String phone;
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    //性别 0-男 1-女 2-保密
+    private Gender gender;
 
+    //身份证号
+    private String idNumber;
 
+    //头像
+    private String avatar;
+
+    //注册时间
+    private LocalDateTime createTime;
 }

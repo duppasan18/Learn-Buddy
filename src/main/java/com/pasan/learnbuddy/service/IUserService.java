@@ -1,7 +1,9 @@
 package com.pasan.learnbuddy.service;
 
+import com.pasan.learnbuddy.domain.dto.UserLoginDTO;
 import com.pasan.learnbuddy.domain.po.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pasan.learnbuddy.domain.vo.UserLoginVO;
 
 /**
  * <p>
@@ -13,4 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserService extends IService<User> {
 
+    UserLoginVO wxLogin(UserLoginDTO userLoginDTO);
+
+    User getUserInfo(Long userId);
 }
