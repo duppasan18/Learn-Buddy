@@ -1,0 +1,8 @@
+server:
+  host: 192.168.100.128
+mysql:
+  MYSQL_PASSWORD: 123
+  MYSQL_HOST: 192.168.100.128
+nacos:
+  username: nacos
+  password: nacos
