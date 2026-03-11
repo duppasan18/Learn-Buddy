@@ -3,11 +3,14 @@ package com.pasan.user.controller;
 import com.pasan.result.Result;
 import com.pasan.user.domain.dto.UserLoginDTO;
 import com.pasan.user.domain.po.User;
+import com.pasan.user.domain.vo.UserInfoVO;
 import com.pasan.user.domain.vo.UserLoginVO;
 import com.pasan.user.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -29,9 +32,17 @@ public class UserController {
      * @return
      */
     @GetMapping("/info")
-    public Result<User> getUserInfo(){
+    public Result<UserInfoVO> getUserInfo(){
         Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return Result.success(userService.getUserInfo(userId));
+    }
+
+    /**
+     * 获取指定id集合用户信息
+     */
+    @GetMapping("/infos")
+    public List<UserInfoVO> getUserInfos(@RequestParam("ids") List<Long> ids){
+        return userService.getUserInfos(ids);
     }
 
 }

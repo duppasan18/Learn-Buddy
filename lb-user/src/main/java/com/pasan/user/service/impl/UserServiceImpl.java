@@ -1,25 +1,32 @@
 package com.pasan.user.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.pasan.config.wechat.WechatProperties;
 import com.pasan.constants.JwtClaimsConstant;
 import com.pasan.constants.MessageConstant;
+import com.pasan.constants.OssConstant;
 import com.pasan.exception.BusinessException;
 import com.pasan.exception.LoginFailedException;
 import com.pasan.user.domain.dto.UserLoginDTO;
+import com.pasan.user.domain.enums.Gender;
 import com.pasan.user.domain.po.User;
+import com.pasan.user.domain.vo.UserInfoVO;
 import com.pasan.user.domain.vo.UserLoginVO;
 import com.pasan.user.mapper.UserMapper;
 import com.pasan.user.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pasan.util.HttpClientUtil;
 import com.pasan.util.JwtUtil;
+import com.pasan.util.RandomStringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,6 +67,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             //公共字段的aop只能填充带有createTime和createUser属性的对象
             //User不具有createUser属性
             user = User.builder()
+                    .name("学伴"+ RandomStringUtil.generate(5))
+                    .avatar(OssConstant.DEFAULT_AVATAR)
+                    .gender(Gender.SECRET)
                     .openid(openid)
                     .createTime(LocalDateTime.now())
                     .build();
@@ -77,17 +87,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     /**
-     * 获取当前用户信息
+     * 获取指定用户信息
      * @return
      */
     @Override
-    public User getUserInfo(Long userId) {
+    public UserInfoVO getUserInfo(Long userId) {
         User user = getById(userId);
         if(user == null){
             throw new BusinessException(MessageConstant.USER_NOT_FOUND);
         }
+        UserInfoVO vo = BeanUtil.copyProperties(user, UserInfoVO.class);
+        return vo;
+    }
 
-        return user;
+    @Override
+    public List<UserInfoVO> getUserInfos(List<Long> ids) {
+        // 获取用户信息
+        List<User> list = lambdaQuery()
+                .in(User::getId, ids)
+                .list();
+        // 判空
+        if(CollUtil.isEmpty(list)){
+            return List.of();
+        }
+        // 不为空则复制属性返回
+        List<UserInfoVO> vos = BeanUtil.copyToList(list, UserInfoVO.class);
+        return vos;
     }
 
 

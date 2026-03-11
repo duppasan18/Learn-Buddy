@@ -1,5 +1,6 @@
 package com.pasan.user.domain.po;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -11,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.apache.ibatis.type.EnumOrdinalTypeHandler;
 
 /**
  * <p>
@@ -38,14 +40,8 @@ public class User implements Serializable {
     //姓名
     private String name;
 
-    //手机号
-    private String phone;
-
     //性别 0-男 1-女 2-保密
     private Gender gender;
-
-    //身份证号
-    private String idNumber;
 
     //头像
     private String avatar;

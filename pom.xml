@@ -46,6 +46,9 @@
         <servlet.version>6.1.0</servlet.version>
         <spring-cloud-gateway.version>4.1.9</spring-cloud-gateway.version>
         <redis.version>3.2.12</redis.version>
+        <openfeign.version>4.3.0</openfeign.version>
+        <loadbalancer.version>4.3.0</loadbalancer.version>
+        <hutool.version>5.8.43</hutool.version>
     </properties>
 
     <dependencyManagement>
@@ -147,6 +150,18 @@
                 <scope>compile</scope>
                 <version>${redis.version}</version>
             </dependency>
+            <!--openFeign-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>${openfeign.version}</version>
+            </dependency>
+            <!--负载均衡器-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+                <version>${loadbalancer.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -166,6 +181,13 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
             <!--<version>${bootstrap.version}</version>-->
+        </dependency>
+        <!--hutool-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <version>${hutool.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

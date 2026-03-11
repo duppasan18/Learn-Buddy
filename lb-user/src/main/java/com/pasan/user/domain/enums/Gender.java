@@ -1,6 +1,7 @@
 package com.pasan.user.domain.enums;
 
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
 import lombok.Getter;
 
 @Getter
@@ -10,6 +11,7 @@ public enum Gender {
     FEMALE(1, "女"),
     SECRET(2, "保密");
 
+    @EnumValue
     private final Integer code;
     private final String desc;
 
