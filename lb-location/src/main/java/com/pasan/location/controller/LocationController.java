@@ -1,6 +1,7 @@
 package com.pasan.location.controller;
 
 import com.pasan.location.domain.dto.LocationDTO;
+import com.pasan.location.domain.vo.NearByUserVO;
 import com.pasan.location.service.ILocationService;
 import com.pasan.result.Result;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,15 @@ public class LocationController {
     public Result saveLocation(@RequestBody LocationDTO dto){
         locationService.saveLocation(dto);
         return Result.success();
+    }
+
+    /**
+     * 获取附近的人
+     */
+    @GetMapping("/nearby")
+    public Result<List<NearByUserVO>> nearby(){
+        List<NearByUserVO> nearby = locationService.getNearby();
+        return Result.success(nearby);
     }
 
 

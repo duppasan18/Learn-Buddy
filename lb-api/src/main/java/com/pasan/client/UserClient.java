@@ -1,6 +1,8 @@
-package com.pasan.user.client;
+package com.pasan.client;
 
-import com.pasan.user.domain.vo.UserInfoVO;
+
+
+import com.pasan.vo.UserInfoVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

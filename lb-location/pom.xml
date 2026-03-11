@@ -66,6 +66,16 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
+        <!--lb-api-->
+        <dependency>
+            <groupId>com.pasan</groupId>
+            <artifactId>api</artifactId>
+        </dependency>
+        <!--MySQL-jdbc-->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

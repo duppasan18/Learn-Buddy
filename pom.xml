@@ -25,6 +25,7 @@
         <module>lb-common</module>
         <module>lb-user</module>
         <module>lb-gateway</module>
+        <module>lb-api</module>
     </modules>
     <scm>
         <connection/>
@@ -143,6 +144,13 @@
                 <artifactId>lb-common</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
+            <!--lb-api-->
+            <dependency>
+                <groupId>com.pasan</groupId>
+                <artifactId>api</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
             <!--redis-->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
