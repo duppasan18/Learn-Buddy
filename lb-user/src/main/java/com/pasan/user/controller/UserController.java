@@ -1,13 +1,11 @@
 package com.pasan.user.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pasan.result.Result;
 import com.pasan.user.domain.dto.UserLoginDTO;
 import com.pasan.user.domain.po.User;
 import com.pasan.user.domain.vo.UserLoginVO;
 import com.pasan.user.service.IUserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
