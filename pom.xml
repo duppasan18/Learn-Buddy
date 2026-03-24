@@ -34,6 +34,7 @@
         <url/>
     </scm>
     <properties>
+        <lombok.version>1.18.34</lombok.version>
         <java.version>17</java.version>
         <mybatis-plus.version>3.5.15</mybatis-plus.version>
         <MySQL-connector.version>8.0.33</MySQL-connector.version>
@@ -177,6 +178,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
