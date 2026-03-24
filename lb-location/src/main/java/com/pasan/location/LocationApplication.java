@@ -1,6 +1,7 @@
 package com.pasan.location;
 
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -13,6 +14,7 @@ import java.net.UnknownHostException;
 @SpringBootApplication
 @EnableFeignClients(basePackages = "com.pasan.client")
 @Slf4j
+@MapperScan("com.pasan.location.mapper")
 public class LocationApplication {
 
     public static void main(String[] args) throws UnknownHostException {
