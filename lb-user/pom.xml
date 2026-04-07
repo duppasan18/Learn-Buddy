@@ -8,9 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.pasan</groupId>
     <artifactId>lb-user</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>lb-user</name>
     <description>lb-user</description>
     <url/>

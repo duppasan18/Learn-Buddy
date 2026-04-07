@@ -8,9 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.pasan</groupId>
     <artifactId>api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>lb-api</name>
     <description>lb-api</description>
     <url/>
