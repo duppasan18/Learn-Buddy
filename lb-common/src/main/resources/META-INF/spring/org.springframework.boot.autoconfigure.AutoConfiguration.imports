@@ -1,3 +1,4 @@
 com.pasan.config.security.SecurityConfig
 com.pasan.config.wechat.WechatConfig
 com.pasan.config.jjwt.JwtConfig
+com.pasan.config.jackson.JsonConfig
