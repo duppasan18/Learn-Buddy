@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 全局异常处理
+ * 仅在进入controller层后生效
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {

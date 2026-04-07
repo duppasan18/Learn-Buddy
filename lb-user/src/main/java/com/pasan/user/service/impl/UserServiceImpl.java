@@ -8,6 +8,7 @@ import com.pasan.config.wechat.WechatProperties;
 import com.pasan.constants.JwtClaimsConstant;
 import com.pasan.constants.MessageConstant;
 import com.pasan.constants.OssConstant;
+import com.pasan.constants.RedisConstant;
 import com.pasan.exception.BusinessException;
 import com.pasan.exception.LoginFailedException;
 import com.pasan.user.domain.dto.UserLoginDTO;
@@ -22,6 +23,7 @@ import com.pasan.util.HttpClientUtil;
 import com.pasan.util.JwtUtil;
 import com.pasan.util.RandomStringUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,7 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     private final WechatProperties wechatProperties;
     private final JwtUtil jwtUtil;
-
+    private final StringRedisTemplate redisTemplate;
 
     /**
      * 微信登录
@@ -79,6 +81,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         Map<String,Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = jwtUtil.createJWT(claims);
+
+        redisTemplate.opsForValue().set(RedisConstant.TOKEN_KEY + user.getId(), token);
 
         return UserLoginVO.builder()
                 .id(user.getId())

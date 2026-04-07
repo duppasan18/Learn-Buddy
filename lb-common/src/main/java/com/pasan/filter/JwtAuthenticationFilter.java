@@ -2,6 +2,8 @@ package com.pasan.filter;
 
 
 import com.pasan.config.security.MySecurityProperties;
+import com.pasan.constants.RedisConstant;
+import com.pasan.exception.LoginFailedException;
 import com.pasan.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -10,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -26,12 +30,14 @@ import java.util.Set;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final StringRedisTemplate redisTemplate;
 
     private final Set<String> whiteList;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, MySecurityProperties properties) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, MySecurityProperties properties, StringRedisTemplate redisTemplate) {
         this.whiteList = properties.getWhiteList();
         this.jwtUtil = jwtUtil;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -62,6 +68,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             log.info("userId: {}", userId);
 
+            String validToken = redisTemplate.opsForValue().get(RedisConstant.TOKEN_KEY + userId);
+            if(validToken == null || !validToken.equals(token)){
+                throw new LoginFailedException("token已失效");
+            }
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userId,
                     null,
@@ -71,7 +82,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .setAuthentication(authentication);
 
         } catch (Exception e) {
+            log.error("无法解析token", e);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"msg\":\""+e.getMessage()+"\"}");
             return;
         }
         filterChain.doFilter(request, response);
