@@ -26,6 +26,7 @@
         <module>lb-user</module>
         <module>lb-gateway</module>
         <module>lb-api</module>
+        <module>lb-location</module>
     </modules>
     <scm>
         <connection/>
