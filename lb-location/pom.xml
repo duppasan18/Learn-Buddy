@@ -8,7 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <artifactId>location</artifactId>
+    <artifactId>lb-location</artifactId>
     <name>lb-location</name>
     <description>lb-location</description>
     <url/>
