@@ -36,7 +36,7 @@ public class SecurityConfig {
                 // 排除的路径
                         // todo 配置白名单
                         .requestMatchers("/user/login").permitAll()
-                        //.requestMatchers("/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         // 其他接口需要认证
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

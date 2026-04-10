@@ -27,6 +27,7 @@
         <module>lb-gateway</module>
         <module>lb-api</module>
         <module>lb-location</module>
+        <module>lb-websocket</module>
     </modules>
     <scm>
         <connection/>
@@ -52,6 +53,7 @@
         <openfeign.version>4.3.0</openfeign.version>
         <loadbalancer.version>4.3.0</loadbalancer.version>
         <hutool.version>5.8.43</hutool.version>
+        <websocket.version>3.2.10</websocket.version>
     </properties>
 
     <dependencyManagement>
@@ -171,6 +173,13 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-loadbalancer</artifactId>
                 <version>${loadbalancer.version}</version>
+            </dependency>
+            <!--websocket-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-websocket</artifactId>
+                <scope>compile</scope>
+                <version>${websocket.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

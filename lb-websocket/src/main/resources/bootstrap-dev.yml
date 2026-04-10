@@ -1,0 +1,5 @@
+server:
+  host: 192.168.100.128
+nacos:
+  username: nacos
+  password: nacos

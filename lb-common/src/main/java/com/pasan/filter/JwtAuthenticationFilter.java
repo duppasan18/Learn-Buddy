@@ -1,6 +1,7 @@
 package com.pasan.filter;
 
 
+import cn.hutool.core.text.AntPathMatcher;
 import com.pasan.config.security.MySecurityProperties;
 import com.pasan.constants.RedisConstant;
 import com.pasan.exception.LoginFailedException;
@@ -31,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final StringRedisTemplate redisTemplate;
+    private final AntPathMatcher antPathMatcher;
 
     private final Set<String> whiteList;
 
@@ -38,14 +40,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.whiteList = properties.getWhiteList();
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
+        this.antPathMatcher = new AntPathMatcher();
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
 
+        boolean isWhite = whiteList.stream()
+                .anyMatch(pattern -> antPathMatcher.match(pattern, path));
+
         // 排除白名单路径
-        if (whiteList.contains(path)) {
+        if (isWhite) {
             filterChain.doFilter(request, response);
             return;
         }

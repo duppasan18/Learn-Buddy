@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: lb-websocket
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:nacos:shared-jwt-properties.yaml
+      - optional:nacos:shared-wechat-properties.yaml
+      - optional:nacos:shared-security.yaml
+  cloud:
+    nacos:
+      server-addr: 192.168.100.128:8848 # nacos注册中心
+server:
+  port: 8084
