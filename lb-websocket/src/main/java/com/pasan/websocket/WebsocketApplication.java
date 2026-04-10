@@ -11,10 +11,10 @@ import java.net.UnknownHostException;
 
 @SpringBootApplication
 @Slf4j
-public class LbWebsocketApplication {
+public class WebsocketApplication {
 
     public static void main(String[] args) throws UnknownHostException {
-        SpringApplication app = new SpringApplicationBuilder(LbWebsocketApplication.class).build(args);
+        SpringApplication app = new SpringApplicationBuilder(WebsocketApplication.class).build(args);
         Environment env = app.run(args).getEnvironment();
 
         String protocol = "http";
