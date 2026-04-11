@@ -1,9 +1,12 @@
 package com.pasan.gateway;
 
+import com.pasan.gateway.config.DynamicRouteConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
 
 import java.net.InetAddress;
@@ -11,6 +14,7 @@ import java.net.UnknownHostException;
 
 @SpringBootApplication
 @Slf4j
+@EnableConfigurationProperties(DynamicRouteConfig.class)
 public class GatewayApplication {
 
     public static void main(String[] args) throws UnknownHostException {
