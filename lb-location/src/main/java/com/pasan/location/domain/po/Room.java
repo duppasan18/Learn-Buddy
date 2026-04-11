@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import com.pasan.location.domain.enums.RoomStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -42,6 +44,9 @@ public class Room implements Serializable {
 
     //纬度
     private Double latitude;
+
+    //状态 0-不可用 1-可用
+    private RoomStatus status;
 
 
 }

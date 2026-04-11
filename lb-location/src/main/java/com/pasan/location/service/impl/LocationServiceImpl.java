@@ -52,7 +52,7 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
         }
         // 存储位置信息
         String member = RedisConstant.NEARBY_MEMBER_PREFIX+userId;
-        redisTemplate.opsForGeo().add(RedisConstant.NEARBY_USER_KEY,
+        redisTemplate.opsForGeo().add(RedisConstant.USER_LOCATION_KEY,
                 new Point(dto.getLongitude(), dto.getLatitude()), member);
 
     }
@@ -69,7 +69,7 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
         Distance distanceScope = new Distance(0.5, Metrics.KILOMETERS); //搜索附近0.5公里
         // 获取附近用户的id
         GeoResults<RedisGeoCommands.GeoLocation<String>> results =
-                redisTemplate.opsForGeo().radius(RedisConstant.NEARBY_USER_KEY, member, distanceScope,args);
+                redisTemplate.opsForGeo().radius(RedisConstant.USER_LOCATION_KEY, member, distanceScope,args);
         if (results == null) {
             return List.of();
         }
@@ -112,7 +112,7 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
         }
         // 存储位置信息
         String member = RedisConstant.NEARBY_MEMBER_PREFIX+userId;
-        redisTemplate.opsForGeo().remove(RedisConstant.NEARBY_USER_KEY, member);
+        redisTemplate.opsForGeo().remove(RedisConstant.USER_LOCATION_KEY, member);
     }
 
     @Override
