@@ -16,4 +16,10 @@ public class NearByRoomVO {
     // 距离,单位跟随service层，m
     private Double distance;
 
+    // 最大容纳人数
+    private Integer capacity;
+
+    // 已容纳人数
+    private Integer attendNum = 50;
+
 }

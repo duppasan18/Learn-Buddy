@@ -1,16 +1,18 @@
 package com.pasan.location.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pasan.client.UserClient;
 import com.pasan.constants.RedisConstant;
 import com.pasan.exception.BusinessException;
 import com.pasan.exception.LoginFailedException;
-import com.pasan.location.domain.dto.LocationDTO;
+import com.pasan.location.domain.dto.Location;
 import com.pasan.location.domain.po.Room;
 import com.pasan.location.domain.vo.NearByRoomVO;
 import com.pasan.location.domain.vo.NearByUserVO;
+import com.pasan.location.domain.vo.RoomVO;
 import com.pasan.location.mapper.LocationMapper;
 import com.pasan.location.service.ILocationService;
 import com.pasan.vo.UserInfoVO;
@@ -44,14 +46,14 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
      * @param dto
      */
     @Override
-    public void saveLocation(LocationDTO dto) {
+    public void saveUserLocation(Location dto) {
         // 获取用户id
         Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(userId == null){
             throw new LoginFailedException("用户未登录");
         }
         // 存储位置信息
-        String member = RedisConstant.NEARBY_MEMBER_PREFIX+userId;
+        String member = userId.toString();
         redisTemplate.opsForGeo().add(RedisConstant.USER_LOCATION_KEY,
                 new Point(dto.getLongitude(), dto.getLatitude()), member);
 
@@ -116,12 +118,13 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
     }
 
     @Override
-    public List<NearByRoomVO> getNearbyRoom(LocationDTO dto) {
+    public List<NearByRoomVO> getNearbyRoom(Location dto) {
         // 组装查询数据
         RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                 .includeDistance()     // 返回距离
                 .sortAscending();      // 距离从小到大排序
         Circle circle = new Circle(dto.getLongitude(), dto.getLatitude(), 50000); // 默认单位为m
+        // todo 判key是否存在，空则重新初始化
         // 按照距离获取最近的自习空间
         GeoResults<RedisGeoCommands.GeoLocation<String>> results =
                 redisTemplate.opsForGeo().radius(RedisConstant.ROOM_LOCATION_KEY,circle,args);
@@ -152,6 +155,7 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
                 vo.setDistance(distance);
             }
         }
+        // todo 获取容纳人数并添加到VO中
         return vos;
     }
 
@@ -166,7 +170,7 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
             }
             // 缓存到Redis中
             Integer id = room.getId();
-            String key = RedisConstant.ROOM_LOCATION_KEY+id;
+            String member = id.toString();
             redisTemplate.execute(new SessionCallback<Object>() {
                 @Nullable
                 @Override
@@ -174,7 +178,7 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
                     operations.multi(); // 开始事务
                     // 存储经纬度
                     operations.opsForGeo().add(RedisConstant.ROOM_LOCATION_KEY,
-                            new Point(room.getLongitude(), room.getLatitude()), key);
+                            new Point(room.getLongitude(), room.getLatitude()), member);
                     // 存储信息
                     operations.opsForHash().put(RedisConstant.ROOM_INFO_KEY, id.toString(), JSON.toJSONString(room));
                     return operations.exec(); // 提交事务
@@ -184,5 +188,75 @@ public class LocationServiceImpl extends ServiceImpl<LocationMapper, Room> imple
             log.error("添加自习室失败",e);
             throw new BusinessException("添加自习室失败");
         }
+    }
+
+    @Override
+    public List<Long> getNearbyRoomInvite() {
+        // 获取用户id
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(userId == null){
+            throw new LoginFailedException("用户未登录");
+        }
+        // 获取用户位置信息
+        List<Point> position = redisTemplate.opsForGeo().position(RedisConstant.USER_LOCATION_KEY, userId.toString());
+        if(position == null || position.isEmpty()){
+            return List.of();
+        }
+        Point point = position.get(0);
+        Location dto = new Location();
+        dto.setLatitude(point.getY());
+        dto.setLongitude(point.getX());
+
+        // 组装查询数据
+        RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
+                .includeDistance()     // 返回距离
+                .sortAscending();      // 距离从小到大排序
+        Circle circle = new Circle(dto.getLongitude(), dto.getLatitude(), 50000); // 默认单位为m
+        // 按照距离获取最近的自习邀约
+        GeoResults<RedisGeoCommands.GeoLocation<String>> results =
+                redisTemplate.opsForGeo().radius(RedisConstant.INVITATION_LOCATION_KEY,circle,args);
+        if (results == null) {
+            return List.of();
+        }
+        LinkedHashMap<String, Double> distanceMap = results.getContent().stream()                 // 提取 GeoLocation<String>
+                .collect(Collectors.toMap(
+                        r -> r.getContent().getName().replace(RedisConstant.INVITATION_LOCATION_KEY, ""), // key: 去掉前缀
+                        r -> r.getDistance().getValue(),                                   // value: 距离
+                        (oldVal, newVal) -> oldVal,                                        // 合并策略（一般不会重复）
+                        LinkedHashMap::new                                                   // 保持顺序
+                ));
+        Set<String> ids = distanceMap.keySet();
+        log.info("附近自习邀约的ids:{}",ids);
+        return ids.stream().map(Long::parseLong).toList();
+    }
+
+    @Override
+    public Location getRoomLocation(Long roomId) {
+        List<Point> position = redisTemplate.opsForGeo().position(RedisConstant.ROOM_LOCATION_KEY, roomId.toString());
+        if(CollUtil.isEmpty( position)){
+            throw new BusinessException("未查询到对应自习室信息");
+        }
+        Point point = position.get(0);
+        Location location = new Location();
+        location.setLongitude(point.getY());
+        location.setLatitude(point.getX());
+        return location;
+    }
+
+    @Override
+    public List<RoomVO> getRoomInfos(List<Long> ids) {
+        List<String> fields = ids.stream()
+                .map(String::valueOf)
+                .toList();
+
+        List<Object> objectList = redisTemplate.opsForHash().multiGet(RedisConstant.ROOM_INFO_KEY, Arrays.asList(fields.toArray()));
+        List<RoomVO> list = new ArrayList<>(objectList.size());
+        for (Object o : objectList) {
+            String json = (String) o;
+            Room room = JSON.parseObject(json,Room.class);
+            RoomVO vo = BeanUtil.copyProperties(room, RoomVO.class);
+            list.add(vo);
+        }
+        return list;
     }
 }

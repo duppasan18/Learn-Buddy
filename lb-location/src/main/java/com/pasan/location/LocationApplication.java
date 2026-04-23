@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
 import java.net.InetAddress;
@@ -15,6 +16,7 @@ import java.net.UnknownHostException;
 @EnableFeignClients(basePackages = "com.pasan.client")
 @Slf4j
 @MapperScan("com.pasan.location.mapper")
+@ComponentScan(basePackages = "com.pasan")
 public class LocationApplication {
 
     public static void main(String[] args) throws UnknownHostException {

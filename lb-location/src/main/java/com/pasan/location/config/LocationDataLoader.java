@@ -44,7 +44,6 @@ public class LocationDataLoader implements CommandLineRunner {
         for(Room room : roomList){
             // 缓存到Redis中
             Integer id = room.getId();
-            String key = RedisConstant.ROOM_LOCATION_KEY+id;
             redisTemplate.execute(new SessionCallback<Object>() {
                 @Nullable
                 @Override
@@ -52,7 +51,7 @@ public class LocationDataLoader implements CommandLineRunner {
                     operations.multi(); // 开始事务
                     // 存储经纬度
                     operations.opsForGeo().add(RedisConstant.ROOM_LOCATION_KEY,
-                            new Point(room.getLongitude(), room.getLatitude()), key);
+                            new Point(room.getLongitude(), room.getLatitude()), id.toString());
                     // 存储信息
                     operations.opsForHash().put(RedisConstant.ROOM_INFO_KEY, id.toString(), JSON.toJSONString(room));
                     return operations.exec(); // 提交事务
