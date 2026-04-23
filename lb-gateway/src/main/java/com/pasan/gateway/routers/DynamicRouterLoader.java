@@ -1,28 +1,24 @@
 package com.pasan.gateway.routers;
 
-import cn.hutool.core.collection.CollUtil;
 import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
-import com.pasan.gateway.config.DynamicRouteConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.properties.bind.Bindable;
-import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
+import org.springframework.cloud.gateway.filter.FilterDefinition;
+import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionWriter;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.net.URI;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -30,21 +26,20 @@ import java.util.concurrent.Executor;
 @RequiredArgsConstructor
 @Slf4j
 public class DynamicRouterLoader {
-    // 配置管理器实例
-    private final NacosConfigManager nacosConfigManager;
-    //路由更新器实例
-    private final RouteDefinitionWriter routeDefinitionWriter;
-    private final ConfigurableEnvironment environment;
 
-    //private final String dataId = "shared-gateway-config.yaml";
+    private final NacosConfigManager nacosConfigManager;
+    private final RouteDefinitionWriter routeDefinitionWriter;
+    private final ApplicationEventPublisher publisher;
+
     private final String dataId = "gateway-routers.yaml";
     private final String group = "DEFAULT_GROUP";
 
+    // 当前已加载的路由ID
     private final Set<String> routeIds = ConcurrentHashMap.newKeySet();
 
     @PostConstruct
-    public void initRouteConfigListener() throws NacosException {
-        // 项目启动前拉取配置，并添加监听器
+    public void init() throws NacosException {
+
         String configInfo = nacosConfigManager.getConfigService()
                 .getConfigAndSignListener(dataId, group, 5000, new Listener() {
                     @Override
@@ -54,54 +49,109 @@ public class DynamicRouterLoader {
 
                     @Override
                     public void receiveConfigInfo(String configInfo) {
-                        //监听配置变更更新路由表
-                        updateConfig(configInfo);
+                        log.info("监听到路由配置变化");
+                        updateRoutes(configInfo);
                     }
                 });
+
         // 首次启动更新路由表
-        updateConfig(configInfo);
+        updateRoutes(configInfo);
     }
 
-    public void updateConfig(String configInfo){
+    /**
+     * 更新路由
+     */
+    public void updateRoutes(String configInfo) {
         try {
-            log.info("监听到更新的路由表：{}", configInfo);
-            // 解析配置文件
-            MapPropertySource propertySource = new MapPropertySource("dynamic-route-config",
-                    new Yaml().load(configInfo));
+            log.info("加载路由配置：\n{}", configInfo);
 
-            // 放入环境
-            environment.getPropertySources().addFirst(propertySource);
-            // 绑定配置
-            DynamicRouteConfig config = Binder.get(environment)
-                    .bind("", Bindable.of(DynamicRouteConfig.class))
-                    .orElseThrow(() -> new RuntimeException("路由解析失败"));
+            List<RouteDefinition> routes = parseRoutes(configInfo);
 
-            List<RouteDefinition> routes = config.getRoutes();
-            if(CollUtil.isEmpty(routes)){
-                log.error("没有读取到任何路由配置");
+            if (routes.isEmpty()) {
+                log.error("未解析到任何路由！");
                 return;
             }
 
-            // 删除旧路由表，添加新路由
+            // 删除旧路由
             Flux<Void> deleteFlux = Flux.fromIterable(routeIds)
-                            .flatMap(id -> routeDefinitionWriter.delete(Mono.just(id)));
+                    .flatMap(id -> routeDefinitionWriter.delete(Mono.just(id))
+                            .onErrorResume(e -> Mono.empty()));
 
+            // 新增路由
             Flux<Void> saveFlux = Flux.fromIterable(routes)
                     .flatMap(route -> routeDefinitionWriter.save(Mono.just(route)));
 
+            // 执行 + 刷新
             deleteFlux
                     .thenMany(saveFlux)
-                    .doOnComplete(()->{
+                    .doOnComplete(() -> {
                         routeIds.clear();
-                        routes.forEach(route -> routeIds.add(route.getId()));
-                        log.info("刷新了{}条路由",routes.size());
+                        routes.forEach(r -> routeIds.add(r.getId()));
+
+                        log.info("动态路由刷新完成，共{}条", routes.size());
+
+                        // 刷新网关缓存
+                        publisher.publishEvent(new RefreshRoutesEvent(this));
                     })
-                    .doOnError(e->log.error("路由刷新失败：{}",e.getMessage()));
-        } catch (RuntimeException e) {
-            log.error("路由解析失败：{}", e.getMessage());
+                    .doOnError(e -> log.error("路由刷新失败", e))
+                    .subscribe(); // 订阅
+
+        } catch (Exception e) {
+            log.error("解析路由配置失败", e);
         }
     }
 
+    /**
+     * RouteDefinition转换
+     * 将yaml格式转换为RouteDefinition
+     */
+    private List<RouteDefinition> parseRoutes(String configInfo) {
 
+        Yaml yaml = new Yaml();
+        Map<String, Object> map = yaml.load(configInfo);
 
+        List<Map<String, Object>> routeList =
+                (List<Map<String, Object>>) map.get("routes");
+
+        if (routeList == null) {
+            return Collections.emptyList();
+        }
+
+        List<RouteDefinition> result = new ArrayList<>();
+
+        for (Map<String, Object> item : routeList) {
+
+            RouteDefinition rd = new RouteDefinition();
+
+            // id
+            rd.setId((String) item.get("id"));
+
+            // uri
+            rd.setUri(URI.create((String) item.get("uri")));
+
+            // predicates
+            List<String> predicates = (List<String>) item.get("predicates");
+            if (predicates != null) {
+                List<PredicateDefinition> predicateDefs = new ArrayList<>();
+                for (String p : predicates) {
+                    predicateDefs.add(new PredicateDefinition(p));
+                }
+                rd.setPredicates(predicateDefs);
+            }
+
+            // filters（可选）
+            List<String> filters = (List<String>) item.get("filters");
+            if (filters != null) {
+                List<FilterDefinition> filterDefs = new ArrayList<>();
+                for (String f : filters) {
+                    filterDefs.add(new FilterDefinition(f));
+                }
+                rd.setFilters(filterDefs);
+            }
+
+            result.add(rd);
+        }
+
+        return result;
+    }
 }
