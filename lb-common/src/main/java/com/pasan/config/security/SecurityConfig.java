@@ -37,6 +37,7 @@ public class SecurityConfig {
                         // todo 配置白名单
                         .requestMatchers("/user/login").permitAll()
                         .requestMatchers("/user/loginTest").permitAll()
+                        .requestMatchers("/chat/message").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         // 其他接口需要认证
                         .anyRequest().authenticated())

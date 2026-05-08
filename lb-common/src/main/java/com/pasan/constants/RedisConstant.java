@@ -10,10 +10,9 @@ public class RedisConstant {
 
     public static final String INVITATION_COUNT_KEY_PREFIX = "invite:count:"; // 邀约当前人数
     public static final String INVITATION_LOCATION_KEY = "invite:geo"; // 邀约自习室位置
-    public static final String INVITATION_INFO_KEY = "invite:info:"; // 邀约信息
-
     public static final String INVITATION_INFO_KEY_PREFIX = "invite:info:"; // 邀约信息
+    public static final String INVITATION_LOCK_KEY_PREFIX = "invite:lock:";
 
-
-
+    public static final String STUDY_ACTIVE_KEY_PREFIX = "study:active:"; // 当前学习状态缓存
+    public static final String STUDY_RANKING_KEY = "study:ranking"; // 学习时长排行榜 ZSET
 }

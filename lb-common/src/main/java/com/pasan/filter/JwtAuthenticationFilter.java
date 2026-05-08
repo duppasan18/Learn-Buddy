@@ -36,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(JwtUtil jwtUtil, MySecurityProperties properties, StringRedisTemplate redisTemplate) {
         this.whiteList = properties.getWhiteList();
         this.whiteList.add("/user/loginTest");
+        this.whiteList.add("/chat/message");
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
         this.antPathMatcher = new AntPathMatcher();
