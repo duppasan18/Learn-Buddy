@@ -47,7 +47,8 @@ public class MaterialServiceImpl extends ServiceImpl<MaterialMapper, Material> i
         if (originalName != null && originalName.contains(".")) {
             ext = originalName.substring(originalName.lastIndexOf("."));
         }
-        String objectName = "materials/" + UUID.randomUUID() + ext;
+        String folder = "avatar".equals(dto.getType()) ? "avatar/" : "materials/";
+        String objectName = folder + UUID.randomUUID() + ext;
 
         String uri;
         try {
