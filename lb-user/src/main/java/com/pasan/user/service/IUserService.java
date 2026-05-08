@@ -8,6 +8,7 @@ import com.pasan.user.domain.vo.UserInfoVO;
 import com.pasan.user.domain.vo.UserLoginVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -21,11 +22,11 @@ public interface IUserService extends IService<User> {
 
     UserLoginVO wxLogin(UserLoginDTO userLoginDTO);
 
-    UserInfoVO getUserInfo(Long userId);
-
     List<UserInfoVO> getUserInfos(List<Long> ids);
 
-    String getToken(Long id);
-
     UserLoginVO testLogin(TestLoginDTO dto);
+
+    void logout();
+
+    void updateUserInfo(Map<String, String> body);
 }
