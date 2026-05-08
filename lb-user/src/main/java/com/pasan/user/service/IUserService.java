@@ -1,6 +1,7 @@
 package com.pasan.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pasan.user.domain.dto.TestLoginDTO;
 import com.pasan.user.domain.dto.UserLoginDTO;
 import com.pasan.user.domain.po.User;
 import com.pasan.user.domain.vo.UserInfoVO;
@@ -23,4 +24,8 @@ public interface IUserService extends IService<User> {
     UserInfoVO getUserInfo(Long userId);
 
     List<UserInfoVO> getUserInfos(List<Long> ids);
+
+    String getToken(Long id);
+
+    UserLoginVO testLogin(TestLoginDTO dto);
 }

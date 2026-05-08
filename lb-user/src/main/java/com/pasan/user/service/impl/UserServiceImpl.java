@@ -11,6 +11,7 @@ import com.pasan.constants.OssConstant;
 import com.pasan.constants.RedisConstant;
 import com.pasan.exception.BusinessException;
 import com.pasan.exception.LoginFailedException;
+import com.pasan.user.domain.dto.TestLoginDTO;
 import com.pasan.user.domain.dto.UserLoginDTO;
 import com.pasan.user.domain.enums.Gender;
 import com.pasan.user.domain.po.User;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * <p>
@@ -82,7 +84,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = jwtUtil.createJWT(claims);
 
-        redisTemplate.opsForValue().set(RedisConstant.TOKEN_KEY + user.getId(), token);
+        redisTemplate.opsForValue().set(RedisConstant.USER_TOKEN_KEY_PREFIX + user.getId(), token);
 
         return UserLoginVO.builder()
                 .id(user.getId())
@@ -119,6 +121,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return vos;
     }
 
+    @Override
+    public String getToken(Long id) {
+        Map<String,Object> claims = new HashMap<>();
+        claims.put(JwtClaimsConstant.USER_ID, id);
+        String token = jwtUtil.createJWT(claims);
+
+        redisTemplate.opsForValue().set(RedisConstant.USER_TOKEN_KEY_PREFIX + id, token);
+        return token;
+    }
+
+    @Override
+    public UserLoginVO testLogin(TestLoginDTO dto) {
+        Long userId = dto.getUserId();
+        User user;
+        if (userId != null) {
+            user = getById(userId);
+            if (user == null) {
+                throw new BusinessException("用户不存在: " + userId);
+            }
+        } else {
+            String name = dto.getName() != null ? dto.getName() : "测试" + RandomStringUtil.generate(5);
+            user = User.builder()
+                    .name(name)
+                    .openid("test_" + UUID.randomUUID())
+                    .avatar(OssConstant.DEFAULT_AVATAR)
+                    .gender(Gender.SECRET)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            save(user);
+        }
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtClaimsConstant.USER_ID, user.getId());
+        String token = jwtUtil.createJWT(claims);
+        redisTemplate.opsForValue().set(RedisConstant.USER_TOKEN_KEY_PREFIX + user.getId(), token);
+
+        return UserLoginVO.builder()
+                .id(user.getId())
+                .token(token)
+                .build();
+    }
 
     /**
      * 调用微信接口获取微信用户openid
