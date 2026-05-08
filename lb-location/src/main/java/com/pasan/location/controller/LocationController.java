@@ -3,7 +3,6 @@ package com.pasan.location.controller;
 import com.pasan.location.domain.dto.Location;
 import com.pasan.location.domain.po.Room;
 import com.pasan.location.domain.vo.NearByRoomVO;
-import com.pasan.location.domain.vo.NearByUserVO;
 import com.pasan.location.domain.vo.RoomVO;
 import com.pasan.location.service.ILocationService;
 import com.pasan.result.Result;
@@ -20,7 +19,7 @@ public class LocationController {
     private final ILocationService locationService;
 
     /**
-     * 接收用户位置信息并存储到redis中
+     * 保存当前用户的位置（经纬度）到Redis GEO
      */
     @PostMapping("/saveUserLocation")
     public Result saveUserLocation(@RequestBody Location dto){
@@ -29,35 +28,15 @@ public class LocationController {
     }
 
     /**
-     * 获取附近的人
-     */
-    // todo 解耦，应该由用户模块返回用户信息
-    @GetMapping("/nearbyUser")
-    public Result<List<NearByUserVO>> nearbyUser(){
-        List<NearByUserVO> nearbyUser = locationService.getNearbyUser();
-        return Result.success(nearbyUser);
-    }
-
-    /**
-     * 删除用户位置信息
-     */
-    @DeleteMapping("/delete")
-    public Result deleteLocation(){
-        locationService.deleteLocation();
-        return Result.success();
-    }
-
-    /**
-     * 获取附近的自习空间，用于创建自习邀约，或者自由自习
+     * 查询附近的自习室列表
      */
     @GetMapping("/nearbyRoom")
     public Result<List<NearByRoomVO>> nearbyRoom(Location dto){
-        List<NearByRoomVO> nearbyRoom = locationService.getNearbyRoom(dto);
-        return Result.success(nearbyRoom);
+        return Result.success(locationService.getNearbyRoom(dto));
     }
 
     /**
-     * 添加自习空间信息
+     * 添加自习室信息并缓存到Redis
      */
     @PostMapping("/addRoom")
     public Result addRoom(@RequestBody Room room){
@@ -66,7 +45,7 @@ public class LocationController {
     }
 
     /**
-     * 获取指定自习空间信息
+     * 获取指定自习室的经纬度坐标
      */
     @GetMapping("/roomLocation/{roomId}")
     public Location getRoomLocation(@PathVariable Long roomId){
@@ -74,7 +53,7 @@ public class LocationController {
     }
 
     /**
-     * 获取附近正在进行的自习邀约id
+     * 查询附近正在进行的邀约ID列表
      */
     @GetMapping("/nearbyRoomInvite")
     public List<Long> nearbyRoomInvite(){
@@ -82,7 +61,7 @@ public class LocationController {
     }
 
     /**
-     * 根据自习室id集合获取信息
+     * 批量获取自习室信息
      */
     @GetMapping("/roomInfos")
     public List<RoomVO> getRoomInfos(@RequestParam("ids") List<Long> ids){
