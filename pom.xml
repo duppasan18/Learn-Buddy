@@ -28,6 +28,7 @@
         <module>lb-api</module>
         <module>lb-location</module>
         <module>lb-websocket</module>
+        <module>lb-material</module>
     </modules>
     <scm>
         <connection/>
