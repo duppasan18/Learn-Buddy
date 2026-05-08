@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil, MySecurityProperties properties, StringRedisTemplate redisTemplate) {
         this.whiteList = properties.getWhiteList();
+        this.whiteList.add("/user/loginTest");
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
         this.antPathMatcher = new AntPathMatcher();
@@ -71,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             log.info("userId: {}", userId);
 
-            String validToken = redisTemplate.opsForValue().get(RedisConstant.TOKEN_KEY + userId);
+            String validToken = redisTemplate.opsForValue().get(RedisConstant.USER_TOKEN_KEY_PREFIX + userId);
             if(validToken == null || !validToken.equals(token)){
                 throw new LoginFailedException("token已失效");
             }
