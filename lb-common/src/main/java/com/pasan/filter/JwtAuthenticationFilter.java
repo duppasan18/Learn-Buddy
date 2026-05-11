@@ -11,13 +11,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -38,6 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil, MySecurityProperties properties, StringRedisTemplate redisTemplate) {
         this.whiteList = properties.getWhiteList();
+        this.whiteList.add("/user/loginTest");
+        this.whiteList.add("/chat/message");
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
         this.antPathMatcher = new AntPathMatcher();
@@ -74,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             log.info("userId: {}", userId);
 
-            String validToken = redisTemplate.opsForValue().get(RedisConstant.TOKEN_KEY + userId);
+            String validToken = redisTemplate.opsForValue().get(RedisConstant.USER_TOKEN_KEY_PREFIX + userId);
             if(validToken == null || !validToken.equals(token)){
                 throw new LoginFailedException("token已失效");
             }

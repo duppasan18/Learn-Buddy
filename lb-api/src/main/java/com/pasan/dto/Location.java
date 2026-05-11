@@ -1,4 +1,4 @@
-package com.pasan.location.domain.dto;
+package com.pasan.dto;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * 位置信息dto
  */
 @Data
-public class LocationDTO {
+public class Location {
 
     // 纬度
     private Double latitude;

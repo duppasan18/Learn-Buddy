@@ -31,6 +31,8 @@ public class JwtUtil {
     private String subject;
     private long expireSeconds;
 
+    public long getExpireSeconds() { return expireSeconds; }
+
     public JwtUtil(JwtProperties properties){
         this.KEY = Keys.hmacShaKeyFor(properties.getSECRET().getBytes());
         this.issuer = properties.getJWT_ISS();

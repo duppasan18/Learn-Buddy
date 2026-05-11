@@ -27,7 +27,9 @@
         <module>lb-gateway</module>
         <module>lb-api</module>
         <module>lb-location</module>
+        <module>lb-invitation</module>
         <module>lb-websocket</module>
+        <module>lb-material</module>
     </modules>
     <scm>
         <connection/>
@@ -53,6 +55,7 @@
         <openfeign.version>4.3.0</openfeign.version>
         <loadbalancer.version>4.3.0</loadbalancer.version>
         <hutool.version>5.8.43</hutool.version>
+        <redisson.version>3.27.2</redisson.version>
         <websocket.version>3.2.10</websocket.version>
     </properties>
 
@@ -116,13 +119,11 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-impl</artifactId>
                 <version>${jjwt.version}</version>
-                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-jackson</artifactId> <!-- 或 jjwt-gson，用于 JSON 序列化 -->
                 <version>${jjwt.version}</version>
-                <scope>runtime</scope>
             </dependency>
             <!--nacos配置管理-->
             <dependency>
@@ -141,6 +142,7 @@
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>${MySQL-connector.version}</version>
+                <scope>runtime</scope>
             </dependency>
             <!--lb-common-->
             <dependency>
@@ -180,6 +182,12 @@
                 <artifactId>spring-boot-starter-websocket</artifactId>
                 <scope>compile</scope>
                 <version>${websocket.version}</version>
+            </dependency>
+            <!--redisson-->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

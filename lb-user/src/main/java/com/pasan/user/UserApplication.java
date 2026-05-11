@@ -16,6 +16,7 @@ import java.net.UnknownHostException;
 @MapperScan("com.pasan.user.mapper")
 @Slf4j
 @EnableConfigurationProperties
+@ComponentScan(basePackages = "com.pasan")
 public class UserApplication {
 
     public static void main(String[] args) throws UnknownHostException {

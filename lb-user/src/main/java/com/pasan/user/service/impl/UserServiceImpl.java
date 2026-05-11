@@ -11,6 +11,7 @@ import com.pasan.constants.OssConstant;
 import com.pasan.constants.RedisConstant;
 import com.pasan.exception.BusinessException;
 import com.pasan.exception.LoginFailedException;
+import com.pasan.user.domain.dto.TestLoginDTO;
 import com.pasan.user.domain.dto.UserLoginDTO;
 import com.pasan.user.domain.enums.Gender;
 import com.pasan.user.domain.po.User;
@@ -24,12 +25,15 @@ import com.pasan.util.JwtUtil;
 import com.pasan.util.RandomStringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -82,11 +86,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = jwtUtil.createJWT(claims);
 
-        redisTemplate.opsForValue().set(RedisConstant.TOKEN_KEY + user.getId(), token);
+        redisTemplate.opsForValue().set(RedisConstant.USER_TOKEN_KEY_PREFIX + user.getId(), token, jwtUtil.getExpireSeconds(), TimeUnit.SECONDS);
 
         return UserLoginVO.builder()
                 .id(user.getId())
                 .token(token)
+                .name(user.getName())
+                .avatar(user.getAvatar())
                 .build();
     }
 
@@ -94,16 +100,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      * 获取指定用户信息
      * @return
      */
-    @Override
-    public UserInfoVO getUserInfo(Long userId) {
-        User user = getById(userId);
-        if(user == null){
-            throw new BusinessException(MessageConstant.USER_NOT_FOUND);
-        }
-        UserInfoVO vo = BeanUtil.copyProperties(user, UserInfoVO.class);
-        return vo;
-    }
-
     @Override
     public List<UserInfoVO> getUserInfos(List<Long> ids) {
         // 获取用户信息
@@ -119,6 +115,57 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return vos;
     }
 
+    @Override
+    public UserLoginVO testLogin(TestLoginDTO dto) {
+        Long userId = dto.getUserId();
+        User user;
+        if (userId != null) {
+            user = getById(userId);
+            if (user == null) {
+                throw new BusinessException("用户不存在: " + userId);
+            }
+        } else {
+            String name = dto.getName() != null ? dto.getName() : "测试" + RandomStringUtil.generate(5);
+            user = User.builder()
+                    .name(name)
+                    .openid("test_" + UUID.randomUUID())
+                    .avatar(OssConstant.DEFAULT_AVATAR)
+                    .gender(Gender.SECRET)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            save(user);
+        }
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtClaimsConstant.USER_ID, user.getId());
+        String token = jwtUtil.createJWT(claims);
+        redisTemplate.opsForValue().set(RedisConstant.USER_TOKEN_KEY_PREFIX + user.getId(), token, jwtUtil.getExpireSeconds(), TimeUnit.SECONDS);
+
+        return UserLoginVO.builder()
+                .id(user.getId())
+                .token(token)
+                .name(user.getName())
+                .avatar(user.getAvatar())
+                .build();
+    }
+
+    @Override
+    public void logout() {
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        redisTemplate.delete(RedisConstant.USER_TOKEN_KEY_PREFIX + userId);
+        redisTemplate.opsForGeo().remove(RedisConstant.USER_LOCATION_KEY, userId.toString());
+    }
+
+    @Override
+    public void updateUserInfo(Map<String, String> body) {
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = getById(userId);
+        if (user == null) throw new BusinessException("用户不存在");
+        String name = body.get("name");
+        String avatar = body.get("avatar");
+        if (name != null && !name.isEmpty()) user.setName(name);
+        if (avatar != null && !avatar.isEmpty()) user.setAvatar(avatar);
+        updateById(user);
+    }
 
     /**
      * 调用微信接口获取微信用户openid
