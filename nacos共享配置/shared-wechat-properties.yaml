@@ -1,0 +1,4 @@
+wechat:
+ appId: <你的小程序id>
+ secret: <小程序对应的secret>
+ enabled: true

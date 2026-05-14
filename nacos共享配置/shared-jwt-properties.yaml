@@ -1,0 +1,5 @@
+jwt:
+  secret: <你的jwt secret>
+  jwt-iss: <你的jwt iss>
+  subject: <你的jwt subject>
+  access-expire: 36000

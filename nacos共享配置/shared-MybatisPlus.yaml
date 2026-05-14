@@ -1,0 +1,12 @@
+mybatis-plus:   
+  mapper-locations: "classpath*:/mapper/**/*.xml" # Mopper.xml文件地址，默认值  
+  configuration:  
+    map-underscore-to-camel-case: true #是否开启下划线和驼峰的驶射  
+    cache-enabled: false #是否开启二级缓存  
+  global-config:  
+    db-config:  
+      id-type: assign_id #id为雪花算法生成  
+      update-strategy: not_null #更新策路:只更新非空字段
+      logic-delete-field: deleted  #全局逻辑删除的实体字段名
+      logic-delete-value: true  #逻辑已删除值，默认为1
+      logic-not-delete-value: false #逻辑未删除值，默认为0

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude plugins *)",
+      "Bash(npm install *)",
+      "Bash(git fetch *)"
+    ]
+  }
+}

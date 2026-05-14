@@ -1,0 +1,5 @@
+security:
+ white-list:
+  - /user/login
+  - /ws/**
+  - /user/loginTest

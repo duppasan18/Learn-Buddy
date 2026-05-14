@@ -1,0 +1,7 @@
+aliyun:
+ oss:
+  endpoint: <你的阿里云oss所在的endpoint>
+  bucketName: <你的oss bucket名称>
+  region: <你的阿里云oss bucket所在地区>
+  accessKeyId: <你的阿里云oss bucket的access key id>
+  accessKeySecret: <你的阿里云oss bucket的access key secret>

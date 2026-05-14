@@ -1,0 +1,21 @@
+routes:
+    - id: user
+      uri: lb://lb-user
+      predicates:
+       - Path=/user/**
+    - id: location
+      uri: lb://lb-location
+      predicates:
+       - Path=/location/**
+    - id: websocket
+      uri: lb:ws://lb-websocket
+      predicates:
+       - Path=/ws/**
+    - id: invitation
+      uri: lb://lb-invitation
+      predicates:
+       - Path=/invite/**,/study/**,/chat/**
+    - id: material
+      uri: lb://lb-material
+      predicates:
+       - Path=/material/**

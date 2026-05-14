@@ -6,7 +6,7 @@
         <groupId>com.pasan</groupId>
         <artifactId>LearnBuddy</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath/>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>lb-material</artifactId>
     <name>lb-material</name>

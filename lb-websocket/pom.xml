@@ -6,7 +6,7 @@
         <groupId>com.pasan</groupId>
         <artifactId>LearnBuddy</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
     <artifactId>lb-websocket</artifactId>
     <name>lb-websocket</name>
